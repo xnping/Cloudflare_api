@@ -15,9 +15,18 @@ echo -e "${GREEN}开始安装MySQL 5.7...${NC}"
 echo -e "${GREEN}添加MySQL官方Yum仓库...${NC}"
 rpm -Uvh https://dev.mysql.com/get/mysql57-community-release-el7-11.noarch.rpm
 
-# 2. 安装MySQL服务器
-echo -e "${GREEN}安装MySQL服务器...${NC}"
-yum -y install mysql-community-server
+# 导入MySQL GPG密钥
+echo -e "${GREEN}导入MySQL GPG密钥...${NC}"
+rpm --import https://repo.mysql.com/RPM-GPG-KEY-mysql-2022
+
+# 清理yum缓存
+echo -e "${GREEN}清理YUM缓存...${NC}"
+yum clean all
+yum makecache
+
+# 2. 安装MySQL服务器和客户端
+echo -e "${GREEN}安装MySQL服务器和客户端...${NC}"
+yum -y install mysql-community-server mysql-community-client --nogpgcheck
 
 # 3. 启动MySQL服务
 echo -e "${GREEN}启动MySQL服务...${NC}"
