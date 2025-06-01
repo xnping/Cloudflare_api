@@ -1,0 +1,60 @@
+name: 简单构建和打包
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+      
+    - name: 设置 Java 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        
+    - name: 缓存 Maven 依赖
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+        
+    - name: 给 mvnw 执行权限
+      run: chmod +x ./mvnw
+        
+    - name: 构建项目
+      run: ./mvnw clean compile
+      
+    - name: 运行测试
+      run: ./mvnw test
+      
+    - name: 打包 JAR
+      run: ./mvnw package -DskipTests
+      
+    - name: 显示构建结果
+      run: ls -la target/
+      
+    - name: 上传 JAR 包作为构建产物
+      uses: actions/upload-artifact@v4
+      with:
+        name: cloudflare-api-${{ github.run_number }}
+        path: target/*.jar
+        retention-days: 30
+        
+    - name: 上传构建日志
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-logs-${{ github.run_number }}
+        path: |
+          target/maven-archiver/
+          target/surefire-reports/
+        retention-days: 7
