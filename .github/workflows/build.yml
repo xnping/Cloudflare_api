@@ -26,7 +26,10 @@ jobs:
         path: ~/.m2
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
-        
+
+    - name: 给 mvnw 执行权限
+      run: chmod +x ./mvnw
+
     - name: 运行测试
       run: ./mvnw test
       
